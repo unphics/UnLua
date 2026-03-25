@@ -20,6 +20,9 @@ public class TPSProjectServerTarget : TargetRules
     {
         Type = TargetType.Server;
         DefaultBuildSettings = BuildSettingsVersion.V2;
+        IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_2;
+        WindowsPlatform.Compiler = WindowsCompiler.VisualStudio2022;
+        WindowsPlatform.CompilerVersion = "14.37.32822";
         ExtraModuleNames.Add("TPSProject");
     }
 }

@@ -17,6 +17,9 @@ using System.Collections.Generic;
 
 public class TPSProjectTarget : TargetRules{    public TPSProjectTarget(TargetInfo Target) : base(Target)    {        Type = TargetType.Game;
         DefaultBuildSettings = BuildSettingsVersion.V2;
+        IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_2;
+        WindowsPlatform.Compiler = WindowsCompiler.VisualStudio2022;
+        WindowsPlatform.CompilerVersion = "14.37.32822";
         ExtraModuleNames.AddRange(            new string[]            {
                 "TPSProject"
             }            );    }}
