@@ -25,33 +25,16 @@ public class UnLua : ModuleRules
 {
     public UnLua(ReadOnlyTargetRules Target) : base(Target)
     {
+        bEnableUndefinedIdentifierWarnings = false;
+
         bEnforceIWYU = false;
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicIncludePaths.AddRange(
-            new string[]
-            {
-            }
-        );
+        PublicIncludePaths.AddRange(new string[] {});
 
-        PrivateIncludePaths.AddRange(
-            new[]
-            {
-                "UnLua/Private",
-            }
-        );
+        PrivateIncludePaths.AddRange(new[] {"UnLua/Private",});
 
-        PublicDependencyModuleNames.AddRange(
-            new[]
-            {
-                "Core",
-                "CoreUObject",
-                "Engine",
-                "Slate",
-                "InputCore",
-                "Lua"
-            }
-        );
+        PublicDependencyModuleNames.AddRange(new[] {"Core", "CoreUObject", "Engine", "Slate", "InputCore", "Lua"});
 
         PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Private"));
 
@@ -91,6 +74,7 @@ public class UnLua : ModuleRules
         loadBoolConfig("bEnableRPCCall", "SUPPORTS_RPC_CALL", true);
         loadBoolConfig("bEnableUnrealInsights", "ENABLE_UNREAL_INSIGHTS", false);
         loadBoolConfig("bEnableCallOverriddenFunction", "ENABLE_CALL_OVERRIDDEN_FUNCTION", true);
+        loadBoolConfig("bEnableFText", "UNLUA_ENABLE_FTEXT", false);
         loadBoolConfig("bLuaCompileAsCpp", "LUA_COMPILE_AS_CPP", false);
         loadBoolConfig("bWithUE4Namespace", "WITH_UE4_NAMESPACE", true);
         loadBoolConfig("bLegacyReturnOrder", "UNLUA_LEGACY_RETURN_ORDER", false);
