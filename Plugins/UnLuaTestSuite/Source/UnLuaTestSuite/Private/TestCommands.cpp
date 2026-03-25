@@ -36,7 +36,7 @@ namespace UnLuaTestSuite
         if (WaitForMapToLoad)
             return WaitForMapToLoad->Update();
 
-        LoadMap();
+        //LoadMap();
         return false;
     }
 
