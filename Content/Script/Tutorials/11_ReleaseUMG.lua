@@ -35,7 +35,7 @@ end
 function M:ReceiveBeginPlay()
     local widget_class = UE.UClass.Load("/Game/Tutorials/11_ReleaseUMG/ReleaseUMG_Root.ReleaseUMG_Root_C")
     local widget_root = NewObject(widget_class, self)
-    widget_root:AddToViewport()
+    widget_root:AddToViewport(0)
 
     print_intro()
 end

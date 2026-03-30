@@ -22,7 +22,7 @@ end
 function M:StartFire()
 	self.IsFiring = true
 	self:FireAmmunition()
-	self.TimerHandle = UE.UKismetSystemLibrary.K2_SetTimerDelegate({self, M.Refire}, self.FireInterval, true)
+	self.TimerHandle = UE.UKismetSystemLibrary.K2_SetTimerDelegate({self, M.Refire}, self.FireInterval, true, 0, 0)
 end
 
 function M:StopFire()

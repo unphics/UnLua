@@ -14,7 +14,7 @@ function M:Construct()
     self.ClickMeCheckBox.OnCheckStateChanged:Add(self, self.OnCheckBoxToggled)
 
     -- 相当于在蓝图中的 Set Timer by Event
-    self.TimerHandle = UE.UKismetSystemLibrary.K2_SetTimerDelegate({ self, self.OnTimer }, 1, true)
+    self.TimerHandle = UE.UKismetSystemLibrary.K2_SetTimerDelegate({ self, self.OnTimer }, 1, true, 0, 0)
 end
 
 function M:OnButtonClicked()

@@ -37,7 +37,7 @@ end
 function M:RightMouseButton_Pressed()
     local WidgetClass = self.WidgetClass
     local img = NewObject(WidgetClass, self, nil, "Tutorials.IconWidget")
-    img:AddToViewport()
+    img:AddToViewport(0)
     img:RandomPosition()
 end
 
