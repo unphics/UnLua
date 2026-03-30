@@ -17,7 +17,7 @@ function M:ReceiveBeginPlay()
 
     local s = math.random(2, 10) * 0.1
 
-    self.Sphere:CreateDynamicMaterialInstance():SetVectorParameterValue("Color", FLinearColor(r, g, b))
+    self.Sphere:CreateDynamicMaterialInstance():SetVectorParameterValue("Color", FLinearColor(r, g, b), "")
     self.Sphere:SetWorldScale3D(FVector(s, s, s))
     self.Sphere:AddImpulse(FVector(x, y, z))
 end

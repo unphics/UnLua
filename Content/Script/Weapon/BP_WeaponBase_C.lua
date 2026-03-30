@@ -76,7 +76,7 @@ function M:InstantFire()
 	End.Add(Start)
 	--local HitResult = UE.FHitResult()
 	--local ActorsToIgnore = TArray(AActor)
-	local bResult = UE.UKismetSystemLibrary.LineTraceSingle(self, Start, End, UE.ETraceTypeQuery.Weapon, false, nil, UE.EDrawDebugTrace.None, nil, true)
+	local bResult = UE.UKismetSystemLibrary.LineTraceSingle(self, Start, End, UE.ETraceTypeQuery.Weapon, false, nil, UE.EDrawDebugTrace.None, nil, true, UE.FLinearColor(1,1,0,1), 1)
 	if bResult then
 		-- todo:
 	end
@@ -89,7 +89,7 @@ function M:GetFireInfo()
 	local TraceEnd = TraceStart + Delta
 	local HitResult = UE.FHitResult()
 	--local ActorsToIgnore = TArray(AActor)
-	local bResult = UE.UKismetSystemLibrary.LineTraceSingle(self, TraceStart, TraceEnd, UE.ETraceTypeQuery.Weapon, false, nil, UE.EDrawDebugTrace.None, HitResult, true)
+	local bResult = UE.UKismetSystemLibrary.LineTraceSingle(self, TraceStart, TraceEnd, UE.ETraceTypeQuery.Weapon, false, nil, UE.EDrawDebugTrace.None, HitResult, true, UE.FLinearColor(1,1,1,1), UE.FLinearColor(1,1,0,1), 1)
 	local Translation = self.SkeletalMesh:GetSocketLocation(self.MuzzleSocketName)
 	local Rotation
 	if bResult then

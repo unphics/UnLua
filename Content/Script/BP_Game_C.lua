@@ -18,7 +18,7 @@ function M:SpawnEnemy()
 		self.SpawnLocation.Z = self.SpawnLocation.Z + 100
 		local Target = PlayerCharacter:K2_GetActorLocation()
 		local SpawnRotation = UE.UKismetMathLibrary.FindLookAtRotation(self.SpawnLocation, Target)
-		UE.UAIBlueprintHelperLibrary.SpawnAIFromClass(self, self.AICharacterClass, nil, self.SpawnLocation, SpawnRotation)
+		UE.UAIBlueprintHelperLibrary.SpawnAIFromClass(self, self.AICharacterClass, nil, self.SpawnLocation, SpawnRotation, true, nil)
 		self.AliveEnemies = self.AliveEnemies + 1
 		if self.AliveEnemies > self.MaxEnemies then
 			self.AliveEnemies = self.MaxEnemies
