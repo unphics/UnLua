@@ -5,76 +5,76 @@
 ## 一、核心文件结构与初始化流程
 
 ### 1.1 核心入口文件
-- [ ] **UnLua.cpp/.h**：UnLua的主入口文件
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/UnLua.cpp`
+- [ ] **UnLuaModule.cpp/.h**：UnLua的主入口文件
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/UnLuaModule.cpp`
   - [ ] 功能：插件初始化、模块注册、核心流程控制
-  - [ ] 关键函数：`FUnLuaModule::StartupModule()`、`FUnLuaModule::ShutdownModule()`
+  - [ ] 关键函数：`FUnLuaModule::StartupModule()`、`FUnLuaModule::ShutdownModule()`、`FUnLuaModule::SetActive()`
 
 ### 1.2 Lua环境初始化
 - [ ] **LuaEnv.cpp/.h**：Lua环境管理
   - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaEnv.cpp`
   - [ ] 功能：创建和管理Lua虚拟机实例
-  - [ ] 关键函数：`FLuaEnv::FLuaEnv()`、`FLuaEnv::Initialize()`、`FLuaEnv::ExecuteFile()`
+  - [ ] 关键函数：`FLuaEnv::FLuaEnv()`、`FLuaEnv::Start()`、`FLuaEnv::DoString()`、`FLuaEnv::TryBind()`
 
 ### 1.3 模块注册机制
-- [ ] **ModuleManager.cpp/.h**：模块管理
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/ModuleManager.cpp`
+- [ ] **UnLuaManager.cpp/.h**：模块管理
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/UnLuaManager.cpp`
   - [ ] 功能：管理UnLua的各个功能模块
-  - [ ] 关键函数：`FModuleManager::Initialize()`、模块注册流程
+  - [ ] 关键函数：`UUnLuaManager::Bind()`、`UUnLuaManager::ReplaceInputs()`
 
 ## 二、反射系统与UE交互
 
 ### 2.1 反射系统核心
-- [ ] **LuaReflection.cpp/.h**：UE反射系统与Lua的桥接
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaReflection.cpp`
+- [ ] **ReflectionUtils/**：UE反射系统与Lua的桥接
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/ReflectionUtils/`
   - [ ] 功能：将UE的反射信息转换为Lua可访问的形式
-  - [ ] 关键函数：`FLuaReflection::RegisterClass()`、`FLuaReflection::GetProperty()`
+  - [ ] 关键文件：`ClassDesc.cpp/.h`、`FunctionDesc.cpp/.h`、`PropertyDesc.cpp/.h`
 
 ### 2.2 UE对象在Lua中的表示
-- [ ] **LuaObject.cpp/.h**：UE对象包装器
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaObject.cpp`
+- [ ] **Registries/ObjectRegistry.cpp/.h**：UE对象包装器
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/Registries/ObjectRegistry.cpp`
   - [ ] 功能：将UE对象包装为Lua表，处理对象的生命周期
-  - [ ] 关键函数：`FLuaObject::Push()`、`FLuaObject::GetUObject()`
+  - [ ] 关键函数：`FObjectRegistry::Register()`、`FObjectRegistry::Get()`
 
 ### 2.3 蓝图与Lua交互
-- [ ] **LuaBlueprint.cpp/.h**：蓝图与Lua的交互
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaBlueprint.cpp`
+- [ ] **Binding.cpp**：蓝图与Lua的交互
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/Binding.cpp`
   - [ ] 功能：处理蓝图类的Lua绑定
-  - [ ] 关键函数：`FLuaBlueprint::RegisterBlueprintClass()`、`FLuaBlueprint::CreateInstance()`
+  - [ ] 关键函数：绑定相关函数
 
 ## 三、注册表系统
 
 ### 3.1 全局注册表
-- [ ] **LuaRegistry.cpp/.h**：全局注册表
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaRegistry.cpp`
+- [ ] **Registries/**：全局注册表
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/Registries/`
   - [ ] 功能：管理UE类与Lua表的映射关系
-  - [ ] 关键函数：`FLuaRegistry::RegisterClass()`、`FLuaRegistry::GetClass()`
+  - [ ] 关键文件：`ClassRegistry.cpp/.h`、`FunctionRegistry.cpp/.h`、`PropertyRegistry.cpp/.h`
 
 ### 3.2 类注册机制
-- [ ] **ClassRegister.cpp/.h**：类注册
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/ClassRegister.cpp`
+- [ ] **Registries/ClassRegistry.cpp/.h**：类注册
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/Registries/ClassRegistry.cpp`
   - [ ] 功能：处理UE类的注册过程
-  - [ ] 关键函数：`FClassRegister::Register()`、`FClassRegister::GetRegisteredClass()`
+  - [ ] 关键函数：`FClassRegistry::Register()`、`FClassRegistry::Get()`
 
 ## 四、类型绑定系统
 
 ### 4.1 基础类型绑定
-- [ ] **LuaBase.cpp/.h**：基础类型绑定
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaBase.cpp`
+- [ ] **BaseLib/LuaLib_PrimitiveTypes.cpp**：基础类型绑定
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/BaseLib/LuaLib_PrimitiveTypes.cpp`
   - [ ] 功能：绑定UE的基础类型（FString、FName等）
-  - [ ] 关键函数：`FLuaBase::Register()`、类型转换函数
+  - [ ] 关键函数：基础类型的注册和转换
 
 ### 4.2 数学类型绑定
-- [ ] **LuaVector.cpp/.h**、**LuaRotator.cpp/.h**等：数学类型绑定
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaVector.cpp`等
+- [ ] **MathLib/**：数学类型绑定
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/MathLib/`
   - [ ] 功能：绑定UE的数学类型
-  - [ ] 关键函数：数学类型的注册和转换
+  - [ ] 关键文件：`LuaLib_FVector.cpp`、`LuaLib_FRotator.cpp`、`LuaLib_FQuat.cpp`等
 
 ### 4.3 容器类型绑定
-- [ ] **LuaArray.cpp/.h**、**LuaMap.cpp/.h**等：容器类型绑定
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaArray.cpp`等
+- [ ] **BaseLib/LuaLib_Array.cpp**、**BaseLib/LuaLib_Map.cpp**等：容器类型绑定
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/BaseLib/`
   - [ ] 功能：绑定UE的容器类型
-  - [ ] 关键函数：容器类型的注册和操作
+  - [ ] 关键文件：`LuaLib_Array.cpp`、`LuaLib_Map.cpp`、`LuaLib_Set.cpp`
 
 ## 五、函数与委托绑定
 
@@ -85,38 +85,38 @@
   - [ ] 关键函数：`FLuaFunction::Create()`、`FLuaFunction::Execute()`
 
 ### 5.2 委托绑定
-- [ ] **LuaDelegate.cpp/.h**：委托绑定
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaDelegate.cpp`
+- [ ] **BaseLib/LuaLib_Delegate.cpp**、**BaseLib/LuaLib_MulticastDelegate.cpp**：委托绑定
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/BaseLib/`
   - [ ] 功能：处理UE委托的Lua绑定
-  - [ ] 关键函数：`FLuaDelegate::Bind()`、`FLuaDelegate::Execute()`
+  - [ ] 关键文件：`LuaLib_Delegate.cpp`、`LuaLib_MulticastDelegate.cpp`
 
 ## 六、堆栈操作与数据转换
 
 ### 6.1 堆栈操作
-- [ ] **LuaStack.cpp/.h**：堆栈操作
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaStack.cpp`
+- [ ] **LowLevel.cpp/.h**：堆栈操作
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Public/LowLevel.cpp`
   - [ ] 功能：处理C++与Lua之间的数据交换
-  - [ ] 关键函数：`FLuaStack::Push()`、`FLuaStack::Pop()`、类型转换函数
+  - [ ] 关键函数：`LowLevel::Push()`、`LowLevel::Pop()`、类型转换函数
 
 ### 6.2 数据转换
-- [ ] **LuaConversion.cpp/.h**：数据转换
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaConversion.cpp`
+- [ ] **LuaCore.cpp/.h**：数据转换
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaCore.cpp`
   - [ ] 功能：处理不同类型之间的转换
   - [ ] 关键函数：各种类型转换函数
 
 ## 七、错误处理与调试
 
 ### 7.1 错误处理
-- [ ] **LuaErrorHandling.cpp/.h**：错误处理
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaErrorHandling.cpp`
+- [ ] **UnLuaDebugBase.cpp/.h**：错误处理
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/UnLuaDebugBase.cpp`
   - [ ] 功能：处理Lua执行过程中的错误
   - [ ] 关键函数：错误捕获和处理函数
 
 ### 7.2 调试支持
-- [ ] **LuaDebug.cpp/.h**：调试支持
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaDebug.cpp`
+- [ ] **UnLuaConsoleCommands.cpp/.h**：调试支持
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/UnLuaConsoleCommands.cpp`
   - [ ] 功能：提供调试相关的功能
-  - [ ] 关键函数：调试信息收集和处理
+  - [ ] 关键函数：控制台命令处理函数
 
 ## 八、配置系统
 
@@ -124,7 +124,7 @@
 - [ ] **UnLuaSettings.h**：配置设置
   - [ ] 位置：`Plugins/UnLua/Source/UnLua/Public/UnLuaSettings.h`
   - [ ] 功能：定义UnLua的配置选项
-  - [ ] 关键配置项：Lua文件路径、默认模块等
+  - [ ] 关键配置项：Lua文件路径、默认模块、EnvLocatorClass等
 
 ### 8.2 配置加载
 - [ ] **UnLuaSettings.cpp**：配置加载
@@ -141,37 +141,37 @@
   - [ ] 关键接口：`IUnLuaInterface`及其方法
 
 ### 9.2 自定义绑定
-- [ ] **CustomBinding.cpp/.h**：自定义绑定
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/CustomBinding.cpp`
+- [ ] **LuaDynamicBinding.cpp/.h**：自定义绑定
+  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/LuaDynamicBinding.cpp`
   - [ ] 功能：处理自定义类型的绑定
-  - [ ] 关键函数：自定义类型注册函数
+  - [ ] 关键函数：动态绑定相关函数
 
 ## 十、实战修改练习
 
 ### 10.1 简单修改
 - [ ] **修改Lua文件加载路径**
-  - [ ] 找到相关代码：`LuaEnv.cpp`中的文件加载逻辑
+  - [ ] 找到相关代码：`LuaEnv.cpp`中的`LoadFromFileSystem`函数
   - [ ] 理解当前实现：如何确定Lua文件的搜索路径
   - [ ] 进行修改：添加自定义搜索路径
   - [ ] 测试验证：确保修改后的路径生效
 
 ### 10.2 扩展类型绑定
 - [ ] **添加新类型绑定**
-  - [ ] 找到类型绑定的注册位置：`ModuleManager.cpp`或相关文件
-  - [ ] 理解现有类型的绑定方式：参考`LuaBase.cpp`等
+  - [ ] 找到类型绑定的注册位置：`BaseLib`目录下的相关文件
+  - [ ] 理解现有类型的绑定方式：参考`LuaLib_PrimitiveTypes.cpp`等
   - [ ] 实现新类型的绑定：添加类型转换函数
   - [ ] 测试验证：确保新类型在Lua中可访问
 
 ### 10.3 修改反射行为
 - [ ] **调整反射系统行为**
-  - [ ] 找到反射系统的核心代码：`LuaReflection.cpp`
+  - [ ] 找到反射系统的核心代码：`ReflectionUtils`目录下的文件
   - [ ] 理解当前反射行为：如何处理UE类的属性和方法
   - [ ] 进行修改：调整反射行为以满足需求
   - [ ] 测试验证：确保修改后的反射行为正确
 
 ### 10.4 性能优化
 - [ ] **优化C++与Lua通信**
-  - [ ] 找到性能瓶颈：分析`LuaStack.cpp`中的数据交换
+  - [ ] 找到性能瓶颈：分析`LowLevel.cpp`中的数据交换
   - [ ] 理解当前实现：数据如何在C++和Lua之间传递
   - [ ] 进行优化：减少不必要的数据复制
   - [ ] 测试验证：测量优化前后的性能差异
