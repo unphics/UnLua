@@ -5,10 +5,19 @@
 ## 一、核心文件结构与初始化流程
 
 ### 1.1 核心入口文件
-- [ ] **UnLuaModule.cpp/.h**：UnLua的主入口文件
-  - [ ] 位置：`Plugins/UnLua/Source/UnLua/Private/UnLuaModule.cpp`
-  - [ ] 功能：插件初始化、模块注册、核心流程控制
-  - [ ] 关键函数：`FUnLuaModule::StartupModule()`、`FUnLuaModule::ShutdownModule()`、`FUnLuaModule::SetActive()`
+- [x] **UnLuaModule.cpp/.h**：UnLua的主入口文件
+  - [x] 位置：`Plugins/UnLua/Source/UnLua/Private/UnLuaModule.cpp`
+  - [x] 功能：插件初始化、模块注册、核心流程控制
+  - [x] 关键函数：`FUnLuaModule::StartupModule()`、`FUnLuaModule::ShutdownModule()`、`FUnLuaModule::SetActive()`
+  - [x] **学习笔记**：
+    - **接口与实现分离设计**：头文件中定义 `IUnLuaModule` 接口类，源文件中实现 `FUnLuaModule` 类
+    - **模块生命周期**：`StartupModule()` 在模块加载时调用，`ShutdownModule()` 在模块卸载时调用
+    - **SetActive() 核心逻辑**：
+      - **激活时**：绑定系统错误委托、注册对象生命周期监听、创建 EnvLocator、预绑定配置类
+      - **停用时**：移除委托和监听器、清理 EnvLocator、清理注册表、恢复函数覆盖
+    - **对象生命周期监听**：`NotifyUObjectCreated()` 为新对象绑定Lua，`NotifyUObjectDeleted()` 清理注册表
+    - **预绑定机制**：遍历所有UE类，检查是否是配置中 PreBindClasses 的子类，如果是则预绑定
+    - **编辑器支持**：通过 `WITH_EDITOR` 宏处理编辑器环境，绑定 PIE 相关委托
 
 ### 1.2 Lua环境初始化
 - [ ] **LuaEnv.cpp/.h**：Lua环境管理

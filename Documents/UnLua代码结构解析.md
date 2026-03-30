@@ -14,6 +14,7 @@ UnLua插件的源代码主要位于 `D:\zys\Project\UnLua\Plugins\UnLua\Source\U
 **主要职责**：负责Lua环境的创建、管理和基础绑定
 
 **关键文件**：
+- `UnLuaModule.cpp/.h`：UnLua插件的主入口模块
 - `LuaEnv.cpp`：Lua环境的创建和管理
 - `LuaCore.cpp`：Lua核心功能实现
 - `Binding.cpp`：C++与Lua的绑定实现
@@ -21,6 +22,13 @@ UnLua插件的源代码主要位于 `D:\zys\Project\UnLua\Plugins\UnLua\Source\U
 - `LuaFunction.cpp`：Lua函数的处理
 
 **功能说明**：
+- **UnLuaModule**：
+  - 插件初始化与生命周期管理
+  - 接口与实现分离设计（`IUnLuaModule` 接口 + `FUnLuaModule` 实现）
+  - 系统错误处理委托绑定
+  - 对象生命周期监听（`NotifyUObjectCreated`/`NotifyUObjectDeleted`）
+  - 预绑定机制（`PreBindClasses` 配置）
+  - 编辑器支持（PIE模式处理）
 - 初始化Lua虚拟机
 - 管理Lua脚本的加载和执行
 - 处理C++与Lua之间的双向调用
