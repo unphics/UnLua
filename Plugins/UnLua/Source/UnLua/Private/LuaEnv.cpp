@@ -44,46 +44,39 @@ TMap<lua_State*, FLuaEnv*> FLuaEnv::AllEnvs;
 FLuaEnv::FOnCreated FLuaEnv::OnCreated;
 FLuaEnv::FOnCreated FLuaEnv::OnDestroyed;
 
-#if ENABLE_UNREAL_INSIGHTS && CPUPROFILERTRACE_ENABLED
-void Hook(lua_State* L, lua_Debug* ar)
-{
-    static TSet<FName> IgnoreNames{FName("Class"), FName("index"), FName("newindex")};
+#if ENABLE_UNREAL_INSIGHTS && CPUPROFILERTRACE_ENABLED // 控制是否启用UnrealInsights集成, 控制是否启用CPU性能分析
+// 捕获Lua函数的执行开始和结束事件
+void Hook(lua_State* L, lua_Debug* ar) {
+    // 存储需要忽略的Lua函数名; 这些是Lua元表中的特殊函数调用频率很高, 记录他们会产生大量冗余, 影响性能分析的可读性
+    static TSet<FName> ignoreNames{FName("Class"), FName("index"), FName("newindex")};
 
-    lua_getinfo(L, "nSl", ar);
+    lua_getinfo(L, "nSl", ar); // 获取lua函数信息(n函数名, S源文件名, l函数定义的行号), ar(lua调试信息结构体,用于存储获取的信息)
 
-    if (ar->what == FName("Lua"))
-    {
-        if (IgnoreNames.Contains(ar->name))
-        {
+    if (ar->what == FName("Lua")) { // 仅处理Lua代码
+        if (ignoreNames.Contains(ar->name)) {
             return;
         }
 
-        const auto EventName = FString::Printf(TEXT(
-            "%s [%s:%d]"),
-                                                *FString(ar->name ? ar->name : "N/A"),
-                                                *FPaths::GetBaseFilename(FString(ar->source)),
-                                                ar->linedefined);
+        // 构建一个包含函数名/文件名和行号的事件名称,格式为:函数名[文件名:行号]
+        const auto EventName = FString::Printf(TEXT("%s [%s:%d]"), *FString(ar->name ? ar->name : "N/A"),
+            *FPaths::GetBaseFilename(FString(ar->source)), ar->linedefined);
 
-        if (ar->event == 0)
-        {
-            FCpuProfilerTrace::OutputBeginDynamicEvent(*EventName);
+        if (ar->event == 0) { // 0: 函数调用事件
+            FCpuProfilerTrace::OutputBeginDynamicEvent(*EventName); // 在UnrealInsights中开始一个动态事件
+        } else { // 非0: 函数返回事件
+            FCpuProfilerTrace::OutputEndEvent(); // 在UnrealInsights中结束当前事件
         }
-        else
-        {
-            FCpuProfilerTrace::OutputEndEvent();
-        }
+
     }
 }
 #endif
 
-FLuaEnv::FLuaEnv()
-    : bStarted(false)
-{
-    const auto Settings = GetDefault<UUnLuaSettings>();
-    ModuleLocator = Settings->ModuleLocatorClass.GetDefaultObject();
-    ensureMsgf(ModuleLocator, TEXT("Invalid lua module locator, lua binding will not work properly. please check unlua runtime settings."));
+FLuaEnv::FLuaEnv() : bStarted(false) {
+    const UUnLuaSettings* settings = GetDefault<UUnLuaSettings>();
+    this->ModuleLocator = settings->ModuleLocatorClass.GetDefaultObject();
+    ensureMsgf(this->ModuleLocator, TEXT("Invalid lua module locator, lua binding will not work properly. please check unlua runtime settings."));
 
-    RegisterDelegates();
+    this->_RegisterDelegates();
 
 #if PLATFORM_WINDOWS
     // 防止类似AppleProResMedia插件忘了恢复Dll查找目录
@@ -101,24 +94,24 @@ FLuaEnv::FLuaEnv()
 
     luaL_openlibs(L);
 
-    AddSearcher(LoadFromCustomLoader, 2);
-    AddSearcher(LoadFromFileSystem, 3);
-    AddSearcher(LoadFromBuiltinLibs, 4);
+    this->_AddSearcher(LoadFromCustomLoader, 2);
+    this->_AddSearcher(LoadFromFileSystem, 3);
+    this->_AddSearcher(LoadFromBuiltinLibs, 4);
 
     UELib::Open(L);
 
-    ObjectRegistry = new FObjectRegistry(this);
-    ClassRegistry = new FClassRegistry(this);
-    ClassRegistry->Register("UObject");
-    ClassRegistry->Register("UClass");
+    this->_ObjectRegistry = new FObjectRegistry(this);
+    this->_ClassRegistry = new FClassRegistry(this);
+    this->_ClassRegistry->Register("UObject");
+    this->_ClassRegistry->Register("UClass");
 
-    FunctionRegistry = new FFunctionRegistry(this);
-    DelegateRegistry = new FDelegateRegistry(this);
+    this->_FunctionRegistry = new FFunctionRegistry(this);
+    this->_DelegateRegistry = new FDelegateRegistry(this);
     ContainerRegistry = new FContainerRegistry(this);
     PropertyRegistry = new FPropertyRegistry(this);
     EnumRegistry = new FEnumRegistry(this);
-    DanglingCheck = new FDanglingCheck(this);
-    DeadLoopCheck = new FDeadLoopCheck(this);
+    this->_DanglingCheck = new FDanglingCheck(this);
+    this->_DeadLoopCheck = new FDeadLoopCheck(this);
 
     AutoObjectReference.SetName("UnLua_AutoReference");
     ManualObjectReference.SetName("UnLua_ManualReference");
@@ -182,15 +175,15 @@ FLuaEnv::~FLuaEnv()
     lua_close(L);
     AllEnvs.Remove(L);
 
-    delete ClassRegistry;
-    delete ObjectRegistry;
-    delete DelegateRegistry;
-    delete FunctionRegistry;
+    delete this->_ClassRegistry;
+    delete this->_ObjectRegistry;
+    delete this->_DelegateRegistry;
+    delete this->_FunctionRegistry;
     delete ContainerRegistry;
     delete EnumRegistry;
     delete PropertyRegistry;
-    delete DanglingCheck;
-    delete DeadLoopCheck;
+    delete this->_DanglingCheck;
+    delete this->_DeadLoopCheck;
 
     if (!IsEngineExitRequested() && Manager)
     {
@@ -201,7 +194,7 @@ FLuaEnv::~FLuaEnv()
     AutoObjectReference.Clear();
     ManualObjectReference.Clear();
 
-    UnRegisterDelegates();
+    this->_UnRegisterDelegates();
 
     CandidateInputComponents.Empty();
     FWorldDelegates::OnWorldTickStart.Remove(OnWorldTickStartHandle);
@@ -280,10 +273,10 @@ void FLuaEnv::NotifyUObjectDeleted(const UObjectBase* ObjectBase, int32 Index)
 {
     UObject* Object = (UObject*)ObjectBase;
     PropertyRegistry->NotifyUObjectDeleted(Object);
-    FunctionRegistry->NotifyUObjectDeleted(Object);
+    this->_FunctionRegistry->NotifyUObjectDeleted(Object);
     if (Manager)
         Manager->NotifyUObjectDeleted(Object);
-    ObjectRegistry->NotifyUObjectDeleted(Object);
+    this->_ObjectRegistry->NotifyUObjectDeleted(Object);
 
     if (CandidateInputComponents.Num() <= 0)
         return;
@@ -652,7 +645,7 @@ int FLuaEnv::LoadFromFileSystem(lua_State* L)
     return 0;
 }
 
-void FLuaEnv::AddSearcher(lua_CFunction Searcher, int Index) const
+void FLuaEnv::_AddSearcher(lua_CFunction Searcher, int Index) const
 {
     lua_getglobal(L, "package");
 #if LUA_VERSION_NUM == 501
@@ -734,14 +727,14 @@ void FLuaEnv::OnAsyncLoadingFlushUpdate()
     }
 }
 
-FORCEINLINE void FLuaEnv::RegisterDelegates()
+FORCEINLINE void FLuaEnv::_RegisterDelegates()
 {
     OnAsyncLoadingFlushUpdateHandle = FCoreDelegates::OnAsyncLoadingFlushUpdate.AddRaw(this, &FLuaEnv::OnAsyncLoadingFlushUpdate);
     GUObjectArray.AddUObjectDeleteListener(this);
     bObjectArrayListenerRegistered = true;
 }
 
-FORCEINLINE void FLuaEnv::UnRegisterDelegates()
+FORCEINLINE void FLuaEnv::_UnRegisterDelegates()
 {
     FCoreDelegates::OnAsyncLoadingFlushUpdate.Remove(OnAsyncLoadingFlushUpdateHandle);
     if (!bObjectArrayListenerRegistered)
