@@ -162,9 +162,9 @@ public:
     FORCEINLINE FObjectRegistry* GetObjectRegistry() const { return this->_ObjectRegistry; }
     FORCEINLINE FDelegateRegistry* GetDelegateRegistry() const { return this->_DelegateRegistry; }
     FORCEINLINE FFunctionRegistry* GetFunctionRegistry() const { return this->_FunctionRegistry; }
-    FORCEINLINE FContainerRegistry* GetContainerRegistry() const { return ContainerRegistry; }
-    FORCEINLINE FEnumRegistry* GetEnumRegistry() const { return EnumRegistry; }
-    FORCEINLINE FPropertyRegistry* GetPropertyRegistry() const { return PropertyRegistry; }
+    FORCEINLINE FContainerRegistry* GetContainerRegistry() const { return this->_ContainerRegistry; }
+    FORCEINLINE FEnumRegistry* GetEnumRegistry() const { return this->_EnumRegistry; }
+    FORCEINLINE FPropertyRegistry* GetPropertyRegistry() const { return this->_PropertyRegistry; }
 private:
     /**
      * 类注册表, 管理UClass与Lua类的映射关系
@@ -200,9 +200,9 @@ private:
      * 提供容器的生命周期管理
      * 支持容器的遍历和查询
      */
-    FContainerRegistry* ContainerRegistry;
-    FPropertyRegistry* PropertyRegistry;
-    FEnumRegistry* EnumRegistry;
+    FContainerRegistry* _ContainerRegistry;
+    FPropertyRegistry* _PropertyRegistry;
+    FEnumRegistry* _EnumRegistry;
 
     // 检查器
 public:

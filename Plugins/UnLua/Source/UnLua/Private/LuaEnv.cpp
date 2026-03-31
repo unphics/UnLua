@@ -98,7 +98,7 @@ FLuaEnv::FLuaEnv() : bStarted(false) {
     this->_AddSearcher(LoadFromFileSystem, 3);
     this->_AddSearcher(LoadFromBuiltinLibs, 4);
 
-    UELib::Open(L);
+    UELib::Open(L); // 创建Lua中的UE命名空间使得Lua能访问UE功能函数API
 
     this->_ObjectRegistry = new FObjectRegistry(this);
     this->_ClassRegistry = new FClassRegistry(this);
@@ -107,9 +107,9 @@ FLuaEnv::FLuaEnv() : bStarted(false) {
 
     this->_FunctionRegistry = new FFunctionRegistry(this);
     this->_DelegateRegistry = new FDelegateRegistry(this);
-    ContainerRegistry = new FContainerRegistry(this);
-    PropertyRegistry = new FPropertyRegistry(this);
-    EnumRegistry = new FEnumRegistry(this);
+    this->_ContainerRegistry = new FContainerRegistry(this);
+    this->_PropertyRegistry = new FPropertyRegistry(this);
+    this->_EnumRegistry = new FEnumRegistry(this);
     this->_DanglingCheck = new FDanglingCheck(this);
     this->_DeadLoopCheck = new FDeadLoopCheck(this);
 
@@ -179,9 +179,9 @@ FLuaEnv::~FLuaEnv()
     delete this->_ObjectRegistry;
     delete this->_DelegateRegistry;
     delete this->_FunctionRegistry;
-    delete ContainerRegistry;
-    delete EnumRegistry;
-    delete PropertyRegistry;
+    delete this->_ContainerRegistry;
+    delete this->_EnumRegistry;
+    delete this->_PropertyRegistry;
     delete this->_DanglingCheck;
     delete this->_DeadLoopCheck;
 
@@ -272,7 +272,7 @@ void FLuaEnv::SetName(FString InName)
 void FLuaEnv::NotifyUObjectDeleted(const UObjectBase* ObjectBase, int32 Index)
 {
     UObject* Object = (UObject*)ObjectBase;
-    PropertyRegistry->NotifyUObjectDeleted(Object);
+    this->_PropertyRegistry->NotifyUObjectDeleted(Object);
     this->_FunctionRegistry->NotifyUObjectDeleted(Object);
     if (Manager)
         Manager->NotifyUObjectDeleted(Object);
