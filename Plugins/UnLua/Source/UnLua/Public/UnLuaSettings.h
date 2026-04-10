@@ -36,7 +36,7 @@ public:
     UPROPERTY(Config, EditAnywhere, Category="Runtime")
     int32 DeadLoopCheck = 0;
 
-    /** Prevent dangling pointers in lua. */
+    /** Prevent dangling pointers in lua. 悬垂指针检测 */
     UPROPERTY(Config, EditAnywhere, Category="Runtime")
     bool DanglingCheck = false;
 

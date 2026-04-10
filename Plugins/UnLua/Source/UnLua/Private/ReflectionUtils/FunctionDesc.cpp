@@ -22,7 +22,7 @@
 #include "UnLuaDebugBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "LuaDeadLoopCheck.h"
+#include "Diagnostics/LuaDeadLoopCheck.h"
 #include "Containers/StaticBitArray.h"
 
 /**
