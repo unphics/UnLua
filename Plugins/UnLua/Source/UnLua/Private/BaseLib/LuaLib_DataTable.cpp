@@ -20,9 +20,11 @@ namespace UnLua
 {
     /**
      * Get row data with structure.
+     * local DataTable = UE.UObject.Load('/UnLuaTestSuite/Tests/Regression/Issue583/DataTable_Issue583.DataTable_Issue583')
+     * local Row = UE.FIssue583Row()
+     * local Result = UE.UDataTableFunctionLibrary.GetDataTableRowFromName(DataTable, 'Row_1', Row)
      */
-    static int32 UDataTable_GetRowDataStructure(lua_State* L)
-    {
+    static int32 UDataTable_GetRowDataStructure(lua_State* L) {
         int32 NumParams = lua_gettop(L);
         if (NumParams != 2)
             return luaL_error(L, "invalid parameters");
@@ -37,28 +39,24 @@ namespace UnLua
         FName RowName = UnLua::Get(L, 2, TType<FName>());
         void* RowPtr = Table->FindRowUnchecked(RowName);
 
-        if (RowPtr == nullptr)
-        {
+        if (RowPtr == nullptr) {
             lua_pushnil(L);
-        }
-        else
-        {
+        } else {
             const UScriptStruct* StructType = Table->GetRowStruct();
 
-            if (StructType != nullptr)
-            {
+            if (StructType != nullptr) {
                 FString Name = FString("F" + StructType->GetName());
                 uint8 StructPadding = StructType->GetMinAlignment();
                 uint8 Padding = StructPadding < 8 ? 8 : StructPadding;
-                void* Userdata = NewUserdataWithPadding(L, StructType->GetStructureSize(), TCHAR_TO_UTF8(*Name), Padding);
-                if (Userdata != nullptr)
-                {
-                    if (StructType->StructFlags & STRUCT_CopyNative)
-                    {
+                // NewUserdataWithPadding会自动将用户数据压入Lua堆栈
+                void* Userdata = ::NewUserdataWithPadding(L, StructType->GetStructureSize(), TCHAR_TO_UTF8(*Name), Padding);
+                if (Userdata != nullptr) {
+                    if (StructType->StructFlags & STRUCT_CopyNative) {
                         //Do ScriptStruct Construct
                         UScriptStruct::ICppStructOps* TheCppStructOps = StructType->GetCppStructOps();
                         TheCppStructOps->Construct(Userdata);
                     }
+                    StructType->InitializeStruct(Userdata);
                     StructType->CopyScriptStruct(Userdata, RowPtr);
                 }
             }
@@ -66,8 +64,7 @@ namespace UnLua
         return 1;
     }
 
-    static const luaL_Reg UDataTableLib[] =
-    {
+    static const luaL_Reg UDataTableLib[] = {
         {"GetRowDataStructure", UDataTable_GetRowDataStructure},
         {nullptr, nullptr}
     };
