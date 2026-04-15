@@ -26,8 +26,8 @@
 #include "lua.hpp"
 #include "ObjectReferencer.h"
 #include "HAL/Platform.h"
-#include "Diagnostics/LuaDanglingCheck.h"
-#include "Diagnostics/LuaDeadLoopCheck.h"
+#include "Helpers/Diagnostics/LuaDanglingCheck.h"
+#include "Helpers/Diagnostics/LuaDeadLoopCheck.h"
 #include "LuaModuleLocator.h"
 
 namespace UnLua

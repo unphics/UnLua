@@ -20,12 +20,12 @@
 
 #if ALLOW_CONSOLE
 #include "Engine/Console.h"
-#include "UnLuaConsoleCommands.h"
+#include "Helpers/UnLuaConsoleCommands.h"
 #endif
 
 #include "Engine/World.h"
 #include "UnLuaModule.h"
-#include "DefaultParamCollection.h"
+#include "Helpers/DefaultParamCollection.h"
 #include "GameDelegates.h"
 #include "LuaEnvLocator.h"
 #include "UnLuaDebugBase.h"

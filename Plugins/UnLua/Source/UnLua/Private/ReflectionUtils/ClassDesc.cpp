@@ -17,7 +17,7 @@
 #include "PropertyDesc.h"
 #include "FunctionDesc.h"
 #include "LuaCore.h"
-#include "DefaultParamCollection.h"
+#include "Helpers/DefaultParamCollection.h"
 #include "LowLevel.h"
 #include "UnLuaModule.h"
 

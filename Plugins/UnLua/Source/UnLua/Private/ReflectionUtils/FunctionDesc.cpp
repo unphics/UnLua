@@ -15,14 +15,14 @@
 #include "FunctionDesc.h"
 #include "PropertyDesc.h"
 #include "LuaCore.h"
-#include "DefaultParamCollection.h"
+#include "Helpers/DefaultParamCollection.h"
 #include "LowLevel.h"
 #include "LuaFunction.h"
 #include "UnLua.h"
 #include "UnLuaDebugBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Diagnostics/LuaDeadLoopCheck.h"
+#include "Helpers/Diagnostics/LuaDeadLoopCheck.h"
 #include "Containers/StaticBitArray.h"
 
 /**
