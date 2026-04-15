@@ -12,7 +12,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 // See the License for the specific language governing permissions and limitations under the License.
 
-#include "Optional/Diagnostics/LuaDanglingCheck.h"
+#include "Helpers/Diagnostics/LuaDanglingCheck.h"
 #include "LowLevel.h"
 #include "LuaEnv.h"
 #include "UnLuaDebugBase.h"
