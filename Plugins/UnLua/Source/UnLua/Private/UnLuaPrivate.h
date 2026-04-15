@@ -17,6 +17,7 @@
 #include "CoreUObject.h"
 #include "UnLuaBase.h"
 
+// 日志宏, 这些宏会自动附加Lua调用栈信息, 方便调试
 #define UNLUA_LOG(L, CategoryName, Verbosity, Format, ...) \
     {\
     	FString LogMsg = FString::Printf(Format, ##__VA_ARGS__);\
@@ -41,8 +42,11 @@
         lua_pop(L,1); \
     }
 
+// 性能统计宏(STATS相关)
 #if STATS
+// 定义内存统计组
 DECLARE_STATS_GROUP(TEXT("UnLua"), STATGROUP_UnLua, STATCAT_Advanced);
+// 声明各种内存统计
 DECLARE_MEMORY_STAT_EXTERN(TEXT("Lua Memory"), STAT_UnLua_Lua_Memory, STATGROUP_UnLua, /*UNLUA_API*/);
 DECLARE_MEMORY_STAT_EXTERN(TEXT("Persistent Parameter Buffer Memory"), STAT_UnLua_PersistentParamBuffer_Memory, STATGROUP_UnLua, /*UNLUA_API*/);
 DECLARE_MEMORY_STAT_EXTERN(TEXT("OutParmRec Memory"), STAT_UnLua_OutParmRec_Memory, STATGROUP_UnLua, /*UNLUA_API*/);
@@ -86,14 +90,18 @@ DECLARE_MEMORY_STAT_EXTERN(TEXT("Container Element Cache Memory"), STAT_UnLua_Co
 
 #define UNLUA_DEFINE_STAT(Name)
 
+// 内存分配/释放/重分配统计宏
 #define UNLUA_STAT_MEMORY_ALLOC(Pointer, CounterName)
 #define UNLUA_STAT_MEMORY_FREE(PointerName, CounterName)
 #define UNLUA_STAT_MEMORY_REALLOC(Pointer, NewPointer, CounterName)
 
+// 周期统计宏
 #define UNLUA_DECLARE_CYCLE_STAT(FriendlyName, StatName)
 #define UNLUA_SCOPE_CYCLE_COUNTER(StatName)
 
+// STATS关闭时, 这些宏都是空操作
 #endif
 
-UNLUA_API extern FString GLuaSrcRelativePath;
-UNLUA_API extern FString GLuaSrcFullPath;
+// 全局变量
+UNLUA_API extern FString GLuaSrcRelativePath; // Lua脚本相对路径
+UNLUA_API extern FString GLuaSrcFullPath; // Lua脚本绝对路径
