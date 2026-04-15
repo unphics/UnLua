@@ -22,13 +22,11 @@ namespace UnLua
 {
     class FLuaEnv;
 
-    struct FManualRefProxy
-    {
+    struct FManualRefProxy {
         TWeakObjectPtr<UObject> Object;
     };
 
-    class FObjectRegistry
-    {
+    class FObjectRegistry {
     public:
         explicit FObjectRegistry(FLuaEnv* Env);
 
@@ -36,51 +34,39 @@ namespace UnLua
 
         void NotifyUObjectLuaGC(UObject* Object);
 
+#pragma region 核心方法
+        // Push(L, Object) 将UObject推送到Lua栈
         template <typename T>
         void Push(lua_State* L, TSharedPtr<T> Ptr);
-
         void Push(lua_State* L, UObject* Object);
 
         template <typename T>
         FORCEINLINE TSharedPtr<T> Get(lua_State* L, int Index);
 
-        /**
-         * 将一个UObject绑定到Lua环境，作为lua table访问。
-         * @return lua引用ID
-         */
+        // index Bind(Object) 将UObject绑定到Lua环境, 返回lua引用ID (将一个UObject绑定到Lua环境，作为lua table访问。)
         int Bind(UObject* Object);
 
-        /**
-         * 获取一个值，表示UObject是否绑定到了Lua环境。
-         */
-        bool IsBound(const UObject* Object) const;
-
-        /**
-         * 获取指定UObject在Lua里绑定的table的引用ID。
-         * @return 若没有绑定过则返回LUA_NOREF。
-         */
-        int GetBoundRef(const UObject* Object) const;
-
-        /**
-         * 将指定的UObject从Lua环境解绑。
-         */
+        // 将UObject从Lua环境解绑
         void Unbind(UObject* Object);
 
-        /**
-         * 增加对指定对象的手动引用，并将对应的代理对象压入栈顶
-         */;
+        // 检查UObject是否已绑定
+        bool IsBound(const UObject* Object) const;
+
+        // 获取指定UObject在Lua里绑定的table的引用ID, 若没有绑定过则返回LUA_NOREF
+        int GetBoundRef(const UObject* Object) const;
+
+        // 增加对指定对象的手动引用，并将对应的代理对象压入栈顶
         void AddManualRef(lua_State* L, UObject* Object);
 
-        /**
-         * 强制移除指定对象的手动引用
-         */
+        // 强制移除指定对象的手动引用
         void RemoveManualRef(UObject* Object);
+#pragma endregion
 
     private:
         void RemoveFromObjectMapAndPushToStack(UObject* Object);
 
-        FLuaEnv* Env;
-        TMap<UObject*, int32> ObjectRefs;
+        FLuaEnv* Env; // 指向Lua环境的指针
+        TMap<UObject*, int32> ObjectRefs; // UObject到Lua引用ID的映射表
     };
 
     template <typename T>

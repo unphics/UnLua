@@ -19,16 +19,13 @@
 #include "UnLuaBase.h"
 
 USTRUCT(noexport)
-struct FPropertyCollector
-{
-};
+struct FPropertyCollector {};
 
 namespace UnLua
 {
     class FLuaEnv;
 
-    class FPropertyRegistry
-    {
+    class FPropertyRegistry {
     public:
         explicit FPropertyRegistry(FLuaEnv* Env);
 
