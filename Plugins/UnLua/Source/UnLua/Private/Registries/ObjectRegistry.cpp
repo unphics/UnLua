@@ -108,61 +108,89 @@ void FObjectRegistry::Push(lua_State* L, UObject* Object) {
         lua_pushlightuserdata(L, Object);
         lua_pushvalue(L, -2); // 复制 RAW_UOBJECT
         lua_rawset(L, -4); // ObjectMap[ObjectPtr] = RAW_UOBJECT; [ObjectMap, RAW_UOBJECT]
-        ObjectRefs.Add(Object, LUA_NOREF); // 记录到 C++ 侧映射表
+        this->ObjectRefs.Add(Object, LUA_NOREF); // 记录到 C++ 侧映射表
     }
     lua_remove(L, -2);
 }
 
-int FObjectRegistry::Bind(UObject* Object)
-{
-    if (const auto Exists = ObjectRefs.Find(Object))
-    {
-        if (*Exists != LUA_NOREF)
-            return *Exists;
+int FObjectRegistry::Bind(UObject* InObject) {
+    // 检查已绑定
+    if (const auto exists = ObjectRefs.Find(InObject)) {
+        if (*exists != LUA_NOREF)
+            return *exists;
     }
 
-    const auto L = Env->GetMainState();
+    lua_State* L = Env->GetMainState();
 
-    int OldTop = lua_gettop(L);
+    int oldTop = lua_gettop(L);
 
     lua_getfield(L, LUA_REGISTRYINDEX, REGISTRY_KEY);
-    lua_pushlightuserdata(L, Object);
-    lua_newtable(L); // create a Lua table ('INSTANCE')
-    PushObjectCore(L, Object); // push UObject ('RAW_UOBJECT')
-    lua_pushstring(L, "Object");
-    lua_pushvalue(L, -2);
-    lua_rawset(L, -4); // INSTANCE.Object = RAW_UOBJECT
+    lua_pushlightuserdata(L, InObject); // [ObjectMap, ObjectPtr]
 
+    lua_newtable(L); // create a Lua table ('INSTANCE'); [ObjectMap, ObjectPtr, INSTANCE{}]
+    PushObjectCore(L, InObject); // push UObject ('RAW_UOBJECT'); [ObjectMap, ObjectPtr, INSTANCE{}, RAW_UOBJECT]
+    lua_pushstring(L, "Object");
+    lua_pushvalue(L, -2); // // 复制 RAW_UOBJECT
+    lua_rawset(L, -4); // INSTANCE.Object = RAW_UOBJECT; [ObjectMap, ObjectPtr, INSTANCE{Object = RAW_UOBJECT}]
+
+    //获取类信息; 获取绑定的Lua模块表(REQUIRED_MODULE); [ObjectMap, ObjectPtr, INSTANCE{}, REQUIRED_MODULE]
     // in some case may occur module or object metatable can 
     // not be found problem
-    const auto Class = Object->IsA<UClass>() ? static_cast<UClass*>(Object) : Object->GetClass();
-    const auto ClassBoundRef = Env->GetManager()->GetBoundRef(Class);
+    UClass* Class = InObject->IsA<UClass>() ? static_cast<UClass*>(InObject) : InObject->GetClass();
+    const int ClassBoundRef = Env->GetManager()->GetBoundRef(Class);
     int32 TypeModule = lua_rawgeti(L, LUA_REGISTRYINDEX, ClassBoundRef); // push the required module/table ('REQUIRED_MODULE') to the top of the stack
+
+    // 获取RAW_UOBJECT的元表(METATABLE_UOBJECT); [ObjectMap, ObjectPtr, INSTANCE{}, REQUIRED_MODULE, METATABLE_UOBJECT]
     int32 TypeMetatable = lua_getmetatable(L, -2); // get the metatable ('METATABLE_UOBJECT') of 'RAW_UOBJECT' 
-    if (TypeModule != LUA_TTABLE || TypeMetatable == LUA_TNIL)
-    {
-        lua_pop(L, lua_gettop(L) - OldTop);
-        return LUA_REFNIL;
+
+    // 错误检查 如果模块不是table或元表不存在, 绑定失败，清理栈并返回
+    if (TypeModule != LUA_TTABLE || TypeMetatable == LUA_TNIL) {
+        lua_pop(L, lua_gettop(L) - oldTop);
+        return LUA_REFNIL; // 绑定失败
     }
 
 #if ENABLE_CALL_OVERRIDDEN_FUNCTION
+    // 设置Overridden标志; 标记这个实例是否 override 了某些方法
     lua_pushstring(L, "Overridden");
     lua_pushvalue(L, -2);
     lua_rawset(L, -4);
 #endif
+    /**
+     * 这是关键的两行, 设置元表链
+     * 栈变化:
+     * 设置前:
+     *   INSTANCE{}              ← 元表: nil
+     *   REQUIRED_MODULE{}       ← 元表: nil  
+     *   METATABLE_UOBJECT
+     * 设置后:
+     *   INSTANCE{}              ← 元表: REQUIRED_MODULE
+     *   REQUIRED_MODULE{}       ← 元表: METATABLE_UOBJECT
+     *   METATABLE_UOBJECT
+     * 
+     * lua_setmetatable(L, -2):
+     *    弹出 METATABLE_UOBJECT
+     *    设置 REQUIRED_MODULE 的元表 = METATABLE_UOBJECT
+     *    栈: [ObjectMap, ObjectPtr, INSTANCE{}, REQUIRED_MODULE]
+     *
+     * lua_setmetatable(L, -3):
+     *    弹出 REQUIRED_MODULE
+     *    设置 INSTANCE 的元表 = REQUIRED_MODULE
+     *    栈: [ObjectMap, ObjectPtr, INSTANCE{}]
+     */
     lua_setmetatable(L, -2); // REQUIRED_MODULE.metatable = METATABLE_UOBJECT
     lua_setmetatable(L, -3); // INSTANCE.metatable = REQUIRED_MODULE
-    lua_pop(L, 1);
+    lua_pop(L, 1); // 弹出多余元素; [ObjectMap, ObjectPtr, INSTANCE{}]
 
-    lua_pushvalue(L, -1);
-    const auto Ret = luaL_ref(L, LUA_REGISTRYINDEX);
-    ObjectRefs.Add(Object, Ret);
+    // 注册到 Lua 注册表
+    lua_pushvalue(L, -1); // 复制 INSTANCE
+    const auto Ret = luaL_ref(L, LUA_REGISTRYINDEX); // 注册表[Ret] = INSTANCE
+    this->ObjectRefs.Add(InObject, Ret); // 从栈顶弹出INSTANCE, 存入注册表, 返回引用ID
 
-    FUnLuaDelegates::OnObjectBinded.Broadcast(Object); // 'INSTANCE' is on the top of stack now
+    FUnLuaDelegates::OnObjectBinded.Broadcast(InObject); // 'INSTANCE' is on the top of stack now
 
-    lua_rawset(L, -3);
-    lua_pop(L, 1);
-    return Ret;
+    lua_rawset(L, -3); // ObjectMap[ObjectPtr] = INSTANCE
+    lua_pop(L, 1); // 弹出ObjectMap
+    return Ret; // 返回引用 ID
 }
 
 bool FObjectRegistry::IsBound(const UObject* Object) const {
